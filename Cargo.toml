@@ -1,0 +1,17 @@
+[package]
+name = "pls"
+version = "0.1.1"
+authors = ["Mike Zeller <mike@mikezeller.net>"]
+edition = "2018"
+
+[dependencies]
+reqwest = "0.9.10"
+clap = "2.32.0"
+failure = "0.1.5"
+serde_json = "1.0.38"
+serde = { version = "1.0.88", features = ["derive"] }
+console = "0.7.5"
+dirs = "1.0.5"
+toml = "0.4.10"
+serde_repr = "0.1.4"
+unicode-width = "0.1.5"
