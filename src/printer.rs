@@ -141,7 +141,7 @@ fn print_session<W: Write>(mut handle: &mut W, session: &PlexSession) -> std::io
     Ok(())
 }
 
-pub fn print_data<W: Write>(mut handle: &mut W, data: &PlexpyData) -> std::io::Result<()> {
+pub fn print_data<W: Write>(mut handle: W, data: &PlexpyData) -> std::io::Result<()> {
     for session in &data.sessions {
         print_session(&mut handle, session)?;
     }

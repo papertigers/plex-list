@@ -1,8 +1,15 @@
 [package]
 name = "pls"
-version = "0.1.1"
-authors = ["Mike Zeller <mike@mikezeller.net>"]
+version = "0.1.2"
+description = "List Plex activity via a Tautulli (Plexpy) Server"
 edition = "2018"
+authors = ["Mike Zeller <mike@mikezeller.net>"]
+repository = "https://github.com/papertigers/pls"
+keywords = ["plex", "plexpy", "tautulli", "cli"]
+license = "MIT"
+categories = [
+	"command-line-utilities"
+]
 
 [dependencies]
 reqwest = "0.9.10"
@@ -12,6 +19,6 @@ serde_json = "1.0.38"
 serde = { version = "1.0.88", features = ["derive"] }
 console = "0.7.5"
 dirs = "1.0.5"
-toml = "0.4.10"
+toml = "0.5.1"
 serde_repr = "0.1.4"
 unicode-width = "0.1.5"
