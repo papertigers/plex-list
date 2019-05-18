@@ -158,7 +158,7 @@ mod test {
 
         assert_eq!(none, progress_bar(0), "progress 0%");
         assert_eq!(half, progress_bar(50), "progress 50%");
-        assert_eq!(full, progress_bar(100), "progress 50%");
+        assert_eq!(full, progress_bar(100), "progress 100%");
     }
 
     #[test]
