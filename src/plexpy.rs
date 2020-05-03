@@ -1,5 +1,5 @@
 use crate::printer::print_data;
-use failure::{format_err, Error};
+use anyhow::{anyhow, Error};
 use reqwest::Url;
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_repr::*;
@@ -104,11 +104,11 @@ pub fn get_activity<T: AsRef<str>>(server: T, key: T) -> Result<(), Error> {
         .append_pair("apikey", key.as_ref())
         .append_pair("cmd", "get_activity");
 
-    let plex: ServerInfo = reqwest::get(server)?.json()?;
+    let plex: ServerInfo = reqwest::blocking::get(server)?.json()?;
 
     // the API gave us a 200 response but the "message" field contains an error
     if plex.response.message != "" && plex.response.data.is_none() {
-        return Err(format_err!("{}", &plex.response.message));
+        return Err(anyhow!("{}", &plex.response.message));
     }
 
     if let Some(data) = plex.response.data {

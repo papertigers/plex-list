@@ -1,7 +1,7 @@
 use crate::config;
 use crate::plexpy;
+use anyhow::{anyhow, Error};
 use clap::{crate_authors, crate_description, crate_name, crate_version, App, Arg};
-use failure::Error;
 use std::env;
 
 enum ConfigType {
@@ -24,7 +24,7 @@ fn configure_value(
             ConfigType::Server => return Ok(config.server.clone()),
         }
     }
-    Err(failure::err_msg(
+    Err(anyhow!(
         "the api-key and server url must be provided via command line, env variable, or configuartion file",
     ))
 }

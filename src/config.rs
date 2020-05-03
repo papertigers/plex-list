@@ -1,4 +1,4 @@
-use failure::Error;
+use anyhow::Error;
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]

@@ -1,6 +1,6 @@
 [package]
 name = "plex-list"
-version = "0.1.3"
+version = "0.1.4"
 description = "List Plex activity via a Tautulli (Plexpy) Server"
 readme = "README.md"
 edition = "2018"
@@ -17,13 +17,19 @@ name = "pls"
 path = "src/main.rs"
 
 [dependencies]
-reqwest = "0.9.10"
-clap = "2.32.0"
-failure = "0.1.5"
+clap = "2.33.0"
+anyhow = "1.0"
 serde_json = "1.0.38"
-serde = { version = "1.0.88", features = ["derive"] }
-console = "0.7.5"
+console = "0.11.2"
 dirs = "1.0.5"
 toml = "0.5.1"
 serde_repr = "0.1.4"
 unicode-width = "0.1.5"
+
+[dependencies.reqwest]
+version = "0.10.4"
+features = ["blocking", "json"]
+
+[dependencies.serde]
+version = "1.0.88"
+features = ["derive"]
