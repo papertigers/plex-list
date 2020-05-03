@@ -48,6 +48,14 @@ pub fn execute() -> Result<(), Error> {
                 .takes_value(true)
                 .help("valid API Key for the server"),
         )
+        .arg(
+            Arg::with_name("history")
+                .short("l")
+                .long("list")
+                .takes_value(true)
+                .default_value("25")
+                .help("Get a listing of Plex history"),
+        )
         .get_matches();
 
     let configuration = config::read_user_config()?;
@@ -59,7 +67,14 @@ pub fn execute() -> Result<(), Error> {
         Some(key) => key.to_owned(),
         None => configure_value("PLEXPY_KEY", ConfigType::Key, configuration.as_ref())?,
     };
-    plexpy::get_activity(server, key)?;
 
-    Ok(())
+    if matches.is_present("history") {
+        return Ok(plexpy::get_history(
+            server,
+            key,
+            matches.value_of("history").unwrap(),
+        )?);
+    }
+
+    Ok(plexpy::get_activity(server, key)?)
 }
