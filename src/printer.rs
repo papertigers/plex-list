@@ -159,7 +159,7 @@ fn trunc_str<'a>(width: usize, s: &'a str) -> &'a str {
 fn print_history<W: Write>(mut handle: W, data: &PlexpyHistoryData) -> std::io::Result<()> {
     writeln!(
         handle,
-        "{:<60}{:>20}",
+        "{:^60}{:^20}",
         style("Media").bold().underlined(),
         style("User").bold().underlined(),
     )?;
