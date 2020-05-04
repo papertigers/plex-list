@@ -1,5 +1,6 @@
 use console::style;
 use std::io::Write;
+use std::ops::{Div, Rem};
 use unicode_width::UnicodeWidthStr;
 
 use crate::plexpy::{PlexSession, PlexpyActivityData, PlexpyData, PlexpyHistoryData, SessionType};
@@ -12,6 +13,30 @@ const MOVIE: &str = "🎞 ";
 const UNKNOWN: &str = "? ";
 const SECURE: &str = "🔒";
 const INSECURE: &str = "🔓";
+
+/// Return the quotient and remainder between two T's.
+fn div_rem<T>(lhs: T, rhs: T) -> (T, T)
+where
+    T: Div<Output = T> + Rem<Output = T> + Copy,
+{
+    (lhs / rhs, lhs % rhs)
+}
+
+pub fn duration_delta(s: u64) -> String {
+    let (days, s) = div_rem(s, 86_400);
+    let (hours, s) = div_rem(s, 3600);
+    let (minutes, s) = div_rem(s, 60);
+    let seconds = s;
+    if days > 0 {
+        format!("{}d{}h{}m{:.1}s", days, hours, minutes, seconds)
+    } else if hours > 0 {
+        format!("{}h{}m{:.1}s", hours, minutes, seconds)
+    } else if minutes > 0 {
+        format!("{}m{:.1}s", minutes, seconds)
+    } else {
+        format!("{:.1}s", seconds)
+    }
+}
 
 enum Style {
     Top,
@@ -159,16 +184,18 @@ fn trunc_str<'a>(width: usize, s: &'a str) -> &'a str {
 fn print_history<W: Write>(mut handle: W, data: &PlexpyHistoryData) -> std::io::Result<()> {
     writeln!(
         handle,
-        "{:^60}{:^20}",
+        "{:^60}{:>20}{:>20}",
         style("Media").bold().underlined(),
         style("User").bold().underlined(),
+        style("Duration").bold().underlined(),
     )?;
     for entry in &data.history {
         writeln!(
             handle,
-            "{:<60}{:>20}",
+            "{:<60}{:>20}{:>20}",
             trunc_str(60, &entry.full_title),
             trunc_str(20, &entry.user),
+            duration_delta(entry.duration),
         )?;
     }
     Ok(())

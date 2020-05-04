@@ -49,6 +49,7 @@ pub struct PlexpyHistoryData {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct HistoryEntry {
+    pub duration: u64,
     pub full_title: String,
     pub player: String,
     pub user: String,
