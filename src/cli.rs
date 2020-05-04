@@ -49,7 +49,7 @@ pub fn execute() -> Result<(), Error> {
                 .help("valid API Key for the server"),
         )
         .arg(
-            Arg::with_name("history")
+            Arg::with_name("entries")
                 .short("l")
                 .long("list")
                 .takes_value(true)
@@ -68,11 +68,11 @@ pub fn execute() -> Result<(), Error> {
         None => configure_value("PLEXPY_KEY", ConfigType::Key, configuration.as_ref())?,
     };
 
-    if matches.is_present("history") {
+    if matches.is_present("entries") {
         return Ok(plexpy::get_history(
             server,
             key,
-            matches.value_of("history").unwrap(),
+            matches.value_of("entries").unwrap(),
         )?);
     }
 

@@ -148,6 +148,14 @@ fn print_sessions<W: Write>(mut handle: W, data: &PlexpyActivityData) -> std::io
     Ok(())
 }
 
+fn trunc_str<'a>(width: usize, s: &'a str) -> &'a str {
+    let cols = s.chars().count();
+    if cols > width {
+        return &s[..width];
+    }
+    s
+}
+
 fn print_history<W: Write>(mut handle: W, data: &PlexpyHistoryData) -> std::io::Result<()> {
     writeln!(
         handle,
@@ -156,7 +164,12 @@ fn print_history<W: Write>(mut handle: W, data: &PlexpyHistoryData) -> std::io::
         style("User").bold().underlined(),
     )?;
     for entry in &data.history {
-        writeln!(handle, "{:<60}{:>20}", entry.full_title, entry.user,)?;
+        writeln!(
+            handle,
+            "{:<60}{:>20}",
+            trunc_str(60, &entry.full_title),
+            trunc_str(20, &entry.user),
+        )?;
     }
     Ok(())
 }
