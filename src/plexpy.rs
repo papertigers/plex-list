@@ -40,7 +40,22 @@ pub struct PlexSession {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct PlexpyData {
+pub struct PlexpyHistoryData {
+    #[serde(rename = "recordsTotal")]
+    pub records_total: i64,
+    #[serde(rename = "data")]
+    pub history: Vec<HistoryEntry>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct HistoryEntry {
+    pub full_title: String,
+    pub player: String,
+    pub user: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct PlexpyActivityData {
     pub sessions: Vec<PlexSession>,
     pub stream_count: String,
     pub total_bandwidth: i64,
@@ -49,6 +64,13 @@ pub struct PlexpyData {
     pub stream_count_direct_play: i64,
     pub lan_bandwidth: i64,
     pub stream_count_direct_stream: i64,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(untagged)]
+pub enum PlexpyData {
+    History(PlexpyHistoryData),
+    Activity(PlexpyActivityData),
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -88,34 +110,70 @@ where
 ///  }
 ///}
 /// ```
-fn optional_data<'de, D>(d: D) -> Result<Option<PlexpyData>, D::Error>
+fn optional_data<'de, D, T>(d: D) -> Result<Option<T>, D::Error>
 where
     D: Deserializer<'de>,
+    T: Deserialize<'de>,
 {
     Ok(Deserialize::deserialize(d).ok())
 }
 
-/// Request the Plex server's current activity from a plexpy server
-pub fn get_activity<T: AsRef<str>>(server: T, key: T) -> Result<(), Error> {
-    let mut server = Url::parse(server.as_ref())?;
-    server.set_path("/api/v2");
-    server
-        .query_pairs_mut()
-        .append_pair("apikey", key.as_ref())
-        .append_pair("cmd", "get_activity");
+/// Represents the "cmd" field in the plexpy request query parameter
+enum RequestCmd {
+    /// Get the current active Plex Sessions
+    GetActivity,
+    /// Get the Plex Server history
+    GetHistory,
+}
 
-    let plex: ServerInfo = reqwest::blocking::get(server)?.json()?;
-
-    // the API gave us a 200 response but the "message" field contains an error
-    if plex.response.message != "" && plex.response.data.is_none() {
-        return Err(anyhow!("{}", &plex.response.message));
+impl RequestCmd {
+    fn as_str(&self) -> &'static str {
+        match self {
+            RequestCmd::GetActivity => "get_activity",
+            RequestCmd::GetHistory => "get_history",
+        }
     }
+}
 
-    if let Some(data) = plex.response.data {
+fn print(info: ServerInfo) -> Result<(), Error> {
+    if let Some(data) = info.response.data {
         let stdout = std::io::stdout();
         let mut stdout_lock = stdout.lock();
         print_data(&mut stdout_lock, &data)?;
     }
-
     Ok(())
+}
+
+/// Fire off the GET request to the plexpy server and verify we the plexpy request was successful
+fn do_request(url: Url) -> Result<ServerInfo, Error> {
+    let info: ServerInfo = reqwest::blocking::get(url)?.json()?;
+    // the API gave us a 200 response but the "message" field contains an error
+    if info.response.message != "" && info.response.data.is_none() {
+        return Err(anyhow!("{}", &info.response.message));
+    }
+
+    Ok(info)
+}
+
+/// Setup the URL for the request and setup the common query parameters
+fn prepare_url(server: &str, key: &str, cmd: RequestCmd) -> Result<Url, Error> {
+    let mut url = Url::parse(server)?;
+    url.set_path("/api/v2");
+    url.query_pairs_mut()
+        .append_pair("apikey", key)
+        .append_pair("cmd", cmd.as_str());
+    Ok(url)
+}
+
+/// Request the Plex server's current activity from a plexpy server
+pub fn get_activity<T: AsRef<str>>(server: T, key: T) -> Result<(), Error> {
+    let url = prepare_url(server.as_ref(), key.as_ref(), RequestCmd::GetActivity)?;
+    print(do_request(url)?)
+}
+
+/// Request the Plex server's history from a plexpy server
+pub fn get_history<T: AsRef<str>>(server: T, key: T, entries: &str) -> Result<(), Error> {
+    let mut url = prepare_url(server.as_ref(), key.as_ref(), RequestCmd::GetHistory)?;
+    url.query_pairs_mut().append_pair("length", entries);
+    print(do_request(url)?)
 }

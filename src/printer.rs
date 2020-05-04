@@ -2,7 +2,7 @@ use console::style;
 use std::io::Write;
 use unicode_width::UnicodeWidthStr;
 
-use crate::plexpy::{PlexSession, PlexpyData, SessionType};
+use crate::plexpy::{PlexSession, PlexpyActivityData, PlexpyData, PlexpyHistoryData, SessionType};
 
 const VERTICAL_LINE: &str = "│";
 const HORIZONTAL_LINE: &str = "─";
@@ -141,11 +141,44 @@ fn print_session<W: Write>(mut handle: &mut W, session: &PlexSession) -> std::io
     Ok(())
 }
 
-pub fn print_data<W: Write>(mut handle: W, data: &PlexpyData) -> std::io::Result<()> {
+fn print_sessions<W: Write>(mut handle: W, data: &PlexpyActivityData) -> std::io::Result<()> {
     for session in &data.sessions {
         print_session(&mut handle, session)?;
     }
     Ok(())
+}
+
+fn trunc_str<'a>(width: usize, s: &'a str) -> &'a str {
+    let cols = s.chars().count();
+    if cols > width {
+        return &s[..width];
+    }
+    s
+}
+
+fn print_history<W: Write>(mut handle: W, data: &PlexpyHistoryData) -> std::io::Result<()> {
+    writeln!(
+        handle,
+        "{:^60}{:^20}",
+        style("Media").bold().underlined(),
+        style("User").bold().underlined(),
+    )?;
+    for entry in &data.history {
+        writeln!(
+            handle,
+            "{:<60}{:>20}",
+            trunc_str(60, &entry.full_title),
+            trunc_str(20, &entry.user),
+        )?;
+    }
+    Ok(())
+}
+
+pub fn print_data<W: Write>(mut handle: W, data: &PlexpyData) -> std::io::Result<()> {
+    match data {
+        PlexpyData::Activity(activity) => print_sessions(&mut handle, &activity),
+        PlexpyData::History(history) => print_history(&mut handle, &history),
+    }
 }
 
 mod test {
