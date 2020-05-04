@@ -68,7 +68,7 @@ pub fn execute() -> Result<(), Error> {
         None => configure_value("PLEXPY_KEY", ConfigType::Key, configuration.as_ref())?,
     };
 
-    if matches.is_present("entries") {
+    if matches.occurrences_of("entries") > 0 {
         return Ok(plexpy::get_history(
             server,
             key,
