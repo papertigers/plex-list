@@ -15,6 +15,7 @@ const SECURE: &str = "🔒";
 const INSECURE: &str = "🔓";
 
 /// Return the quotient and remainder between two T's.
+/// Panics if rhs is zero.
 fn div_rem<T>(lhs: T, rhs: T) -> (T, T)
 where
     T: Div<Output = T> + Rem<Output = T> + Copy,
@@ -22,7 +23,8 @@ where
     (lhs / rhs, lhs % rhs)
 }
 
-pub fn duration_delta(s: u64) -> String {
+/// Formats n seconds as days, hours, minutes and seconds.
+pub fn pretty_duration(s: u64) -> String {
     let (days, s) = div_rem(s, 86_400);
     let (hours, s) = div_rem(s, 3600);
     let (minutes, s) = div_rem(s, 60);
@@ -195,7 +197,7 @@ fn print_history<W: Write>(mut handle: W, data: &PlexpyHistoryData) -> std::io::
             "{:<60}{:>20}{:>20}",
             trunc_str(60, &entry.full_title),
             trunc_str(20, &entry.user),
-            duration_delta(entry.duration),
+            pretty_duration(entry.duration),
         )?;
     }
     Ok(())
@@ -209,6 +211,8 @@ pub fn print_data<W: Write>(mut handle: W, data: &PlexpyData) -> std::io::Result
 }
 
 mod test {
+    use super::*;
+
     #[test]
     fn test_progress_bar() {
         use super::progress_bar;
@@ -226,5 +230,34 @@ mod test {
     fn test_progress_bar_invalid_input() {
         use super::progress_bar;
         let _ = progress_bar(255);
+    }
+
+    #[test]
+    #[should_panic]
+    fn div_rem_zero() {
+        let _ = div_rem(100, 0);
+    }
+
+    #[test]
+    fn div_rem_nonzero() {
+        assert_eq!(div_rem(5, 5), (1, 0));
+        assert_eq!(div_rem(10, 5), (2, 0));
+        assert_eq!(div_rem(3, 5), (0, 3));
+    }
+
+    #[test]
+    fn duration_formatting() {
+        assert_eq!(pretty_duration(60), "1m0s");
+        assert_eq!(pretty_duration(3600), "1h0m0s");
+        assert_eq!(pretty_duration(86_400), "1d0h0m0s");
+        assert_eq!(pretty_duration(1242), "20m42s");
+        assert_eq!(pretty_duration(20231), "5h37m11s");
+    }
+
+    #[test]
+    fn truncating_str() {
+        assert_eq!(trunc_str(3, "papertigers"), "pap");
+        assert_eq!(trunc_str(5, "foobar"), "fooba");
+        assert_eq!(trunc_str(10, "foo"), "foo");
     }
 }
