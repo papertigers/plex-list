@@ -173,7 +173,7 @@ fn print_sessions<W: Write>(mut handle: W, data: &PlexpyActivityData) -> std::io
     Ok(())
 }
 
-fn trunc_str<'a>(width: usize, s: &'a str) -> &'a str {
+fn trunc_str(width: usize, s: &str) -> &str {
     let cols = s.chars().count();
     if cols > width {
         return &s[..width];
