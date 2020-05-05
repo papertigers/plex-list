@@ -25,6 +25,7 @@ dirs = "1.0.5"
 toml = "0.5.1"
 serde_repr = "0.1.4"
 unicode-width = "0.1.5"
+unicode-truncate = "0.1.1"
 
 [dependencies.reqwest]
 version = "0.10.4"
