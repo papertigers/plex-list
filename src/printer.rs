@@ -1,6 +1,7 @@
 use console::style;
 use std::io::Write;
 use std::ops::{Div, Rem};
+use unicode_truncate::{Alignment, UnicodeTruncateStr};
 use unicode_width::UnicodeWidthStr;
 
 use crate::plexpy::{PlexSession, PlexpyActivityData, PlexpyData, PlexpyHistoryData, SessionType};
@@ -95,9 +96,7 @@ fn print_session<W: Write>(mut handle: &mut W, session: &PlexSession) -> std::io
         _ => UNKNOWN,
     };
     // len = title + media glyph + number of spaces
-    let len: usize = UnicodeWidthStr::width(session.full_title.as_str())
-        + UnicodeWidthStr::width(media_type)
-        + 3;
+    let len: usize = session.full_title.width() + media_type.width() + 3;
 
     let progress = session.progress_percent.parse().unwrap_or(0_u8);
 
@@ -175,14 +174,6 @@ fn print_sessions<W: Write>(mut handle: W, data: &PlexpyActivityData) -> std::io
     Ok(())
 }
 
-fn trunc_str(width: usize, s: &str) -> &str {
-    let cols = s.chars().count();
-    if cols > width {
-        return &s[..width];
-    }
-    s
-}
-
 fn print_history<W: Write>(mut handle: W, data: &PlexpyHistoryData) -> std::io::Result<()> {
     writeln!(
         handle,
@@ -194,9 +185,9 @@ fn print_history<W: Write>(mut handle: W, data: &PlexpyHistoryData) -> std::io::
     for entry in &data.history {
         writeln!(
             handle,
-            "{:<60}{:>20}{:>20}",
-            trunc_str(60, &entry.full_title),
-            trunc_str(20, &entry.user),
+            "{} {} {:>20}",
+            &entry.full_title.unicode_pad(58, Alignment::Left, true),
+            &entry.user.unicode_pad(20, Alignment::Right, true),
             pretty_duration(entry.duration),
         )?;
     }
@@ -211,6 +202,7 @@ pub fn print_data<W: Write>(mut handle: W, data: &PlexpyData) -> std::io::Result
 }
 
 mod test {
+    #[allow(unused_imports)]
     use super::*;
 
     #[test]
@@ -252,12 +244,5 @@ mod test {
         assert_eq!(pretty_duration(86_400), "1d0h0m0s");
         assert_eq!(pretty_duration(1242), "20m42s");
         assert_eq!(pretty_duration(20231), "5h37m11s");
-    }
-
-    #[test]
-    fn truncating_str() {
-        assert_eq!(trunc_str(3, "papertigers"), "pap");
-        assert_eq!(trunc_str(5, "foobar"), "fooba");
-        assert_eq!(trunc_str(10, "foo"), "foo");
     }
 }
