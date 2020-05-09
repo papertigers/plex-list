@@ -1,6 +1,6 @@
 [package]
 name = "plex-list"
-version = "0.1.5"
+version = "0.1.6"
 description = "List Plex activity via a Tautulli (Plexpy) Server"
 readme = "README.md"
 edition = "2018"
