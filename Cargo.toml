@@ -1,6 +1,6 @@
 [package]
 name = "plex-list"
-version = "0.1.6"
+version = "0.1.7"
 description = "List Plex activity via a Tautulli (Plexpy) Server"
 readme = "README.md"
 edition = "2018"
@@ -28,8 +28,8 @@ unicode-width = "0.1.5"
 unicode-truncate = "0.1.1"
 
 [dependencies.reqwest]
-version = "0.10.4"
-features = ["blocking", "json"]
+version = "0.11.9"
+features = ["blocking", "json", "native-tls-vendored"]
 
 [dependencies.serde]
 version = "1.0.88"
