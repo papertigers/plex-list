@@ -149,7 +149,7 @@ fn print(info: ServerInfo) -> Result<(), Error> {
 fn do_request(url: Url) -> Result<ServerInfo, Error> {
     let info: ServerInfo = reqwest::blocking::get(url)?.json()?;
     // the API gave us a 200 response but the "message" field contains an error
-    if info.response.message != "" && info.response.data.is_none() {
+    if !info.response.message.is_empty() && info.response.data.is_none() {
         return Err(anyhow!("{}", &info.response.message));
     }
 

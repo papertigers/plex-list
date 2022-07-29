@@ -69,12 +69,14 @@ pub fn execute() -> Result<(), Error> {
     };
 
     if matches.occurrences_of("entries") > 0 {
-        return Ok(plexpy::get_history(
+        return plexpy::get_history(
             server,
             key,
-            matches.value_of("entries").unwrap(),
-        )?);
+            matches
+                .value_of("entries")
+                .ok_or_else(|| anyhow!("missing entries"))?,
+        );
     }
 
-    Ok(plexpy::get_activity(server, key)?)
+    plexpy::get_activity(server, key)
 }
