@@ -124,9 +124,10 @@ fn print_session<W: Write>(mut handle: &mut W, session: &PlexSession) -> std::io
     )?;
     writeln!(
         handle,
-        "    {}: {}",
+        "    {}: {} ({})",
         style("Player").italic().dim(),
-        format!("{} ({})", session.player, session.platform)
+        session.player,
+        session.platform
     )?;
     writeln!(
         handle,
@@ -134,7 +135,7 @@ fn print_session<W: Write>(mut handle: &mut W, session: &PlexSession) -> std::io
         style("Quality").italic().dim(),
         session.quality_profile
     )?;
-    if &session.transcode_container != "" {
+    if !&session.transcode_container.is_empty() {
         writeln!(
             handle,
             "    {}: {} -> {}",
@@ -196,8 +197,8 @@ fn print_history<W: Write>(mut handle: W, data: &PlexpyHistoryData) -> std::io::
 
 pub fn print_data<W: Write>(mut handle: W, data: &PlexpyData) -> std::io::Result<()> {
     match data {
-        PlexpyData::Activity(activity) => print_sessions(&mut handle, &activity),
-        PlexpyData::History(history) => print_history(&mut handle, &history),
+        PlexpyData::Activity(activity) => print_sessions(&mut handle, activity),
+        PlexpyData::History(history) => print_history(&mut handle, history),
     }
 }
 
